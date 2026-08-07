@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { withBasePath } from "../lib/site";
 
 type ActiveRoute = "work" | "play";
 
@@ -30,7 +31,7 @@ export function SiteHeader({ active }: SiteHeaderProps) {
           </Link>
           <a
             className="site-nav__link"
-            href="/Tyler-Song-Resume.pdf"
+            href={withBasePath("/Tyler-Song-Resume.pdf")}
             download
             aria-label="Download Tyler Song’s résumé PDF"
           >

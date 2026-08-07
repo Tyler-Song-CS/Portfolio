@@ -1,4 +1,7 @@
+import Link from "next/link";
+import type { CSSProperties } from "react";
 import { SiteFooter, SiteHeader } from "./components/SiteChrome";
+import { withBasePath } from "./lib/site";
 
 export default function Home() {
   return (
@@ -40,9 +43,9 @@ export default function Home() {
                 <a className="text-link" href="#work">
                   scroll to see work <span className="link-mark" aria-hidden="true">↓</span>
                 </a>
-                <a className="text-link text-link--quiet" href="/play">
+                <Link className="text-link text-link--quiet" href="/play">
                   or see what I’m into <span className="link-mark" aria-hidden="true">↗</span>
-                </a>
+                </Link>
               </div>
             </div>
           </section>
@@ -78,7 +81,7 @@ export default function Home() {
                 <div className="visual-frame visual-frame--oracle">
                   <img
                     className="oracle-approval-screenshot"
-                    src="/oracle-approval-routing.png"
+                    src={withBasePath("/oracle-approval-routing.png")}
                     alt="Oracle approval configuration interface showing a rule for San Francisco distribution amounts over ten thousand dollars routed to Max Gray."
                   />
                   <div className="work-visual__caption" aria-hidden="true">
@@ -133,6 +136,11 @@ export default function Home() {
                   <div
                     className="visual-frame visual-frame--cgtech"
                     role="img"
+                    style={
+                      {
+                        "--work-image": `url("${withBasePath("/cgtech-vericut-optimization.png")}")`,
+                      } as CSSProperties
+                    }
                     aria-label="VERICUT machining simulation showing a tool cutting an aerospace bracket alongside optimization charts."
                   >
                     <div className="work-visual__caption" aria-hidden="true">
@@ -199,6 +207,11 @@ export default function Home() {
                   <div
                     className="visual-frame visual-frame--ucsd"
                     role="img"
+                    style={
+                      {
+                        "--work-image": `url("${withBasePath("/ucsd-cognos-dashboard.png")}")`,
+                      } as CSSProperties
+                    }
                     aria-label="IBM Cognos Analytics dashboard showing a high-volume reporting interface."
                   >
                     <div className="work-visual__caption" aria-hidden="true">

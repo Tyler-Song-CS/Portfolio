@@ -750,7 +750,11 @@ h3 {
   overflow: hidden;
   contain: paint;
   padding: 0;
-  background: var(--charcoal) url("/cgtech-vericut-optimization.png") 58% top / cover no-repeat;
+  background-color: var(--charcoal);
+  background-image: var(--work-image, none);
+  background-position: 58% top;
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 
 .visual-frame--ucsd {
@@ -759,7 +763,11 @@ h3 {
   overflow: hidden;
   contain: paint;
   padding: 0;
-  background: #f6f7f7 url("/ucsd-cognos-dashboard.png") center top / cover no-repeat;
+  background-color: #f6f7f7;
+  background-image: var(--work-image, none);
+  background-position: center top;
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 
 .visual-frame--cgtech::before,
