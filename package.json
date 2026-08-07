@@ -7,8 +7,8 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
-    "build:pages": "next build",
+    "build": "node ./node_modules/next/dist/bin/next build",
+    "build:pages": "node ./node_modules/next/dist/bin/next build",
     "lint": "eslint . --ignore-pattern .next"
   },
   "dependencies": {
