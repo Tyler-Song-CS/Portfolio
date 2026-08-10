@@ -49,11 +49,8 @@ export function SiteHeader({ active }: SiteHeaderProps) {
 export function SiteFooter() {
   return (
     <footer className="site-footer" id="contact">
-      <div
-        className="site-container site-footer__grid footer-stage motion-reveal motion-reveal--footer"
-        data-reveal
-      >
-        <div>
+      <div className="site-container site-footer__grid">
+        <div className="footer-intro">
           <p className="eyebrow eyebrow--lime">Let’s connect</p>
           <h2 className="footer-title">
             Open to building

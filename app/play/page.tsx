@@ -1,5 +1,72 @@
 import Link from "next/link";
+import {
+  ProjectDemoVideo,
+  type ProjectiveScreenQuad,
+} from "../components/ProjectDemoVideo";
 import { SiteFooter, SiteHeader } from "../components/SiteChrome";
+import { withBasePath } from "../lib/site";
+
+const projects = [
+  {
+    id: "one",
+    number: "01",
+    title: "Mini Guitar.",
+    description: "Built so I can sing and play guitar at the same time, with chord progressions and playable parts in one place.",
+    href: "https://tyler-song-cs.github.io/Mini-Guitar/",
+  },
+  {
+    id: "two",
+    number: "02",
+    title: "ClayForm Designer.",
+    description: "Built to design pots around key dimensions—and calculate the clay needed to make them.",
+    href: "https://tyler-song-cs.github.io/Pottery-Design/",
+  },
+];
+
+const activities = [
+  {
+    id: "tennis",
+    number: "01",
+    title: "Tennis.",
+    note: "A reset between screens.",
+  },
+  {
+    id: "pottery",
+    number: "02",
+    title: "Pottery.",
+    note: "Hands in clay, mind elsewhere.",
+  },
+  {
+    id: "shelter",
+    number: "03",
+    title: "Cat shelter volunteering.",
+    note: "A small weekly act of care.",
+  },
+  {
+    id: "next",
+    number: "04",
+    title: "Something next.",
+    note: "Another thing worth making time for.",
+  },
+];
+
+// Measured against the complete generated scene assets—not the card box—so
+// both videos remain aligned when the gallery changes size responsively.
+const miniGuitarScreen: ProjectiveScreenQuad = [
+  [407 / 1086, 744 / 1448],
+  [552 / 1086, 689 / 1448],
+  [714 / 1086, 963 / 1448],
+  [559 / 1086, 1027 / 1448],
+];
+
+const clayFormScreen: ProjectiveScreenQuad = [
+  [765 / 1448, 195 / 1086],
+  [1062 / 1448, 266 / 1086],
+  [901 / 1448, 915 / 1086],
+  [602 / 1448, 840 / 1086],
+];
+
+const iPhone13Aspect = 591 / 1280;
 
 export default function PlayPage() {
   return (
@@ -12,200 +79,118 @@ export default function PlayPage() {
             data-play-hero
             aria-labelledby="play-title"
           >
-            <div className="site-container play-hero__grid play-hero__grid--editorial">
+            <div className="site-container play-hero__grid play-hero__grid--studio">
               <div className="play-hero__copy">
                 <h1 id="play-title" className="editorial-title editorial-title--play">
                   <span className="editorial-title__line motion-intro">A few things I</span>
                   <span className="editorial-title__line motion-intro">
-                    <em className="editorial-title__script">make</em> time for.
+                    <span className="play-hero__accent">make</span> time for.
                   </span>
                 </h1>
                 <Link className="text-link motion-intro motion-intro--actions" href="/#work">
                   back to work <span className="link-mark" aria-hidden="true">↗</span>
                 </Link>
               </div>
+
             </div>
           </section>
 
           <section
             className="play-section play-section--projects"
             data-play-projects
-            aria-labelledby="projects-title"
+            aria-label="Side projects"
           >
             <div className="site-container">
-              <header className="side-projects-intro motion-reveal" data-reveal>
+              <header className="play-section__intro motion-reveal" data-reveal>
                 <p className="eyebrow">Side projects</p>
-                <h2 id="projects-title" className="section-display">
-                  Small ideas beyond the day job.
-                </h2>
               </header>
 
-              <div className="side-project-gallery">
-                <article className="side-project side-project--feature motion-reveal" data-reveal>
-                  <div className="side-project__visual play-visual" data-play-visual>
-                    <div
-                      className="side-project__media side-project__media--feature side-project__media--one side-project__media--placeholder play-visual__source"
-                      role="img"
-                      aria-label="Project one image placeholder"
-                    >
-                      <span className="meta-label">Image / project 01</span>
+              <div className="project-gallery">
+                {projects.map((project) => (
+                  <article
+                    className={`project-card project-card--${project.id}`}
+                    key={project.id}
+                  >
+                    {project.id === "one" ? (
+                      <div
+                        className="project-card__media project-card__media--mini-guitar"
+                        data-reveal
+                        data-visual-reveal
+                      >
+                        <ProjectDemoVideo
+                          label="Muted Mini Guitar app demo showing song sections, chord progressions, and a playable guitar."
+                          poster={withBasePath("/mini-guitar-demo-poster.png")}
+                          scene="mini-guitar"
+                          sceneImage={withBasePath("/side-project-scenes/mini-guitar-iphone13-scene.png")}
+                          screenAspect={iPhone13Aspect}
+                          screenFill="#7f8084"
+                          screenQuad={miniGuitarScreen}
+                          src={withBasePath("/mini-guitar-demo.mp4")}
+                        />
+                      </div>
+                    ) : project.id === "two" ? (
+                      <div
+                        className="project-card__media project-card__media--clayform"
+                        data-reveal
+                        data-visual-reveal
+                      >
+                        <ProjectDemoVideo
+                          label="Muted ClayForm Designer app demo showing an adjustable vase profile."
+                          poster={withBasePath("/clayform-designer-demo-poster.png")}
+                          scene="clayform"
+                          sceneImage={withBasePath("/side-project-scenes/clayform-iphone13-scene.png")}
+                          screenAspect={iPhone13Aspect}
+                          screenFill="#7c7c7b"
+                          screenQuad={clayFormScreen}
+                          src={withBasePath("/clayform-designer-demo.mp4")}
+                        />
+                      </div>
+                    ) : (
+                      <div className="project-card__media" data-reveal data-visual-reveal />
+                    )}
+                    <div className="project-card__copy">
+                      <p className="meta-label">{project.number}</p>
+                      <h3>{project.title}</h3>
+                      <p>{project.description}</p>
+                      <a
+                        className="text-link project-card__link"
+                        href={project.href}
+                        rel="noreferrer"
+                        target="_blank"
+                      >
+                        view project <span className="link-mark" aria-hidden="true">↗</span>
+                      </a>
                     </div>
-                    <div className="play-visual__caption" aria-hidden="true">
-                      <p className="play-visual__title">Project title to come.</p>
-                      <p className="play-visual__summary">
-                        A future screenshot, photograph, or project artifact.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="side-project__copy">
-                    <p className="meta-label">01 / project placeholder</p>
-                    <h3>Project title to come.</h3>
-                    <p>A place for a screenshot, photograph, or project artifact.</p>
-                  </div>
-                </article>
-
-                <article className="side-project side-project--secondary motion-reveal" data-reveal>
-                  <div className="side-project__visual play-visual" data-play-visual>
-                    <div
-                      className="side-project__media side-project__media--secondary side-project__media--two side-project__media--placeholder play-visual__source"
-                      role="img"
-                      aria-label="Project two image placeholder"
-                    >
-                      <span className="meta-label">Image / project 02</span>
-                    </div>
-                    <div className="play-visual__caption" aria-hidden="true">
-                      <p className="play-visual__title">Project title to come.</p>
-                      <p className="play-visual__summary">
-                        Another compact visual story to share here.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="side-project__copy">
-                    <p className="meta-label">02 / project placeholder</p>
-                    <h3>Project title to come.</h3>
-                    <p>A space for another project image and a concise introduction.</p>
-                  </div>
-                </article>
-
-                <article className="side-project side-project--secondary motion-reveal" data-reveal>
-                  <div className="side-project__visual play-visual" data-play-visual>
-                    <div
-                      className="side-project__media side-project__media--secondary side-project__media--three side-project__media--placeholder play-visual__source"
-                      role="img"
-                      aria-label="Project three image placeholder"
-                    >
-                      <span className="meta-label">Image / project 03</span>
-                    </div>
-                    <div className="play-visual__caption" aria-hidden="true">
-                      <p className="play-visual__title">Project title to come.</p>
-                      <p className="play-visual__summary">
-                        A visual placeholder for something still taking shape.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="side-project__copy">
-                    <p className="meta-label">03 / project placeholder</p>
-                    <h3>Project title to come.</h3>
-                    <p>A third visual space for something you are still shaping.</p>
-                  </div>
-                </article>
+                  </article>
+                ))}
               </div>
             </div>
           </section>
 
-          <section className="play-section play-section--activities" aria-labelledby="activities-title">
+          <section className="play-section play-section--activities" aria-label="Away from the desk">
             <div className="site-container">
-              <header className="activities-intro motion-reveal" data-reveal>
-                <p className="eyebrow">Outside work</p>
-                <h2 id="activities-title" className="section-display">
-                  A few things I come back to.
-                </h2>
+              <header className="play-section__intro play-section__intro--activities motion-reveal" data-reveal>
+                <p className="eyebrow">Away from the desk</p>
               </header>
 
-              <div className="activities-grid">
-                <article className="activity-card activity-card--tennis motion-reveal" data-reveal>
-                  <div className="activity-card__copy">
-                    <p className="meta-label">01 / tennis</p>
-                    <h3>Tennis.</h3>
-                  </div>
-                  <div className="activity-card__visual play-visual" data-play-visual>
-                    <div className="activity-card__photos play-visual__source" aria-label="Tennis photo placeholders">
-                      <figure className="activity-card__image activity-card__image--primary">
-                      <span className="meta-label">Photo 01 / tennis</span>
-                      </figure>
-                      <figure className="activity-card__image activity-card__image--secondary">
-                      <span className="meta-label">Photo 02 / tennis</span>
-                      </figure>
+              <div className="activity-gallery">
+                {activities.map((activity) => (
+                  <article
+                    className={`activity-card activity-card--${activity.id} motion-reveal`}
+                    data-reveal
+                    key={activity.id}
+                  >
+                    <div className="activity-card__copy">
+                      <p className="meta-label">{activity.number}</p>
+                      <h3>{activity.title}</h3>
+                      <p>{activity.note}</p>
                     </div>
-                    <div className="play-visual__caption" aria-hidden="true">
-                      <p className="play-visual__title">Tennis</p>
-                      <p className="play-visual__summary">Two photo spots for courts, rallies, and match days.</p>
+                    <div className="activity-media">
+                      <div className="activity-media__photo activity-media__photo--primary" />
+                      <div className="activity-media__photo activity-media__photo--secondary" />
                     </div>
-                  </div>
-                </article>
-
-                <article className="activity-card activity-card--pottery motion-reveal" data-reveal>
-                  <div className="activity-card__copy">
-                    <p className="meta-label">02 / pottery</p>
-                    <h3>Pottery.</h3>
-                  </div>
-                  <div className="activity-card__visual play-visual" data-play-visual>
-                    <div className="activity-card__photos play-visual__source" aria-label="Pottery photo placeholders">
-                      <figure className="activity-card__image activity-card__image--primary">
-                      <span className="meta-label">Photo 01 / pottery</span>
-                      </figure>
-                      <figure className="activity-card__image activity-card__image--secondary">
-                      <span className="meta-label">Photo 02 / pottery</span>
-                      </figure>
-                    </div>
-                    <div className="play-visual__caption" aria-hidden="true">
-                      <p className="play-visual__title">Pottery</p>
-                      <p className="play-visual__summary">Two photo spots for pieces, clay, and studio time.</p>
-                    </div>
-                  </div>
-                </article>
-
-                <article className="activity-card activity-card--shelter motion-reveal" data-reveal>
-                  <div className="activity-card__copy">
-                    <p className="meta-label">03 / cat shelter volunteering</p>
-                    <h3>Cat shelter volunteering.</h3>
-                  </div>
-                  <div className="activity-card__visual play-visual" data-play-visual>
-                    <div className="activity-card__photos play-visual__source" aria-label="Cat shelter volunteering photo placeholders">
-                      <figure className="activity-card__image activity-card__image--primary">
-                      <span className="meta-label">Photo 01 / shelter</span>
-                      </figure>
-                      <figure className="activity-card__image activity-card__image--secondary">
-                      <span className="meta-label">Photo 02 / shelter</span>
-                      </figure>
-                    </div>
-                    <div className="play-visual__caption" aria-hidden="true">
-                      <p className="play-visual__title">Cat shelter volunteering</p>
-                      <p className="play-visual__summary">Two photo spots for shelter days and the cats who make them.</p>
-                    </div>
-                  </div>
-                </article>
-
-                <article className="activity-card activity-card--next motion-reveal" data-reveal>
-                  <div className="activity-card__copy">
-                    <p className="meta-label">04 / to be added</p>
-                    <h3>Something next.</h3>
-                  </div>
-                  <div className="activity-card__visual play-visual" data-play-visual>
-                    <div className="activity-card__photos play-visual__source" aria-label="Fourth activity photo placeholders">
-                      <figure className="activity-card__image activity-card__image--primary">
-                      <span className="meta-label">Photo 01 / to be added</span>
-                      </figure>
-                      <figure className="activity-card__image activity-card__image--secondary">
-                      <span className="meta-label">Photo 02 / to be added</span>
-                      </figure>
-                    </div>
-                    <div className="play-visual__caption" aria-hidden="true">
-                      <p className="play-visual__title">Something next</p>
-                      <p className="play-visual__summary">Two photo spots for another thing worth making time for.</p>
-                    </div>
-                  </div>
-                </article>
+                  </article>
+                ))}
               </div>
             </div>
           </section>

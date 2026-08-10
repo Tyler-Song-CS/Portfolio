@@ -13,8 +13,6 @@ export function MotionProvider() {
   useEffect(() => {
     const root = document.documentElement;
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    let observer: IntersectionObserver | undefined;
-    let handoffObserver: IntersectionObserver | undefined;
     let playHandoffObserver: IntersectionObserver | undefined;
 
     const revealElements = () =>
@@ -26,6 +24,68 @@ export function MotionProvider() {
       if (workVisuals.length === 0) {
         return () => {};
       }
+
+      const setupImageReadiness = () => {
+        const cleanupListeners: Array<() => void> = [];
+
+        workVisuals.forEach((visual) => {
+          const images = Array.from(visual.querySelectorAll("img"));
+
+          if (images.length === 0) {
+            visual.classList.add("is-image-ready");
+            return;
+          }
+
+          let pendingImages = images.length;
+
+          const markVisualReady = () => {
+            pendingImages -= 1;
+
+            if (pendingImages === 0) {
+              visual.classList.add("is-image-ready");
+            }
+          };
+
+          images.forEach((image) => {
+            let settled = false;
+
+            const markImageReady = () => {
+              if (settled) return;
+
+              settled = true;
+              markVisualReady();
+            };
+
+            const decodeImage = () => {
+              if (typeof image.decode !== "function") {
+                markImageReady();
+                return;
+              }
+
+              void image.decode().then(markImageReady).catch(markImageReady);
+            };
+
+            if (image.complete) {
+              decodeImage();
+              return;
+            }
+
+            image.addEventListener("load", decodeImage, { once: true });
+            image.addEventListener("error", markImageReady, { once: true });
+            cleanupListeners.push(() => {
+              image.removeEventListener("load", decodeImage);
+              image.removeEventListener("error", markImageReady);
+            });
+          });
+        });
+
+        return () => {
+          cleanupListeners.forEach((cleanup) => cleanup());
+          workVisuals.forEach((visual) => visual.classList.remove("is-image-ready"));
+        };
+      };
+
+      const cleanupImageReadiness = setupImageReadiness();
 
       const scrollMotionQuery = window.matchMedia(
         "(min-width: 721px) and (hover: hover) and (pointer: fine)",
@@ -56,8 +116,8 @@ export function MotionProvider() {
             const focus = Math.max(0, Math.min(1, 1 - Math.abs(visualCenter - viewportFocus) / travel));
 
             visual.classList.add("is-scroll-linked");
-            visual.style.setProperty("--work-scale", (0.94 + focus * 0.06).toFixed(3));
-            visual.style.setProperty("--work-blur", `${((1 - focus) * 0.65).toFixed(2)}px`);
+            visual.style.setProperty("--work-scale", (0.97 + focus * 0.03).toFixed(3));
+            visual.style.setProperty("--work-blur", `${((1 - focus) * 0.35).toFixed(2)}px`);
           });
         } else {
           clearVisualMotion();
@@ -79,69 +139,78 @@ export function MotionProvider() {
         window.removeEventListener("scroll", queueWorkMotion);
         window.removeEventListener("resize", queueWorkMotion);
         scrollMotionQuery.removeEventListener("change", queueWorkMotion);
+        cleanupImageReadiness();
         clearVisualMotion();
       };
     };
 
-    const setupPlayMotion = () => {
-      const playVisuals = Array.from(document.querySelectorAll<HTMLElement>("[data-play-visual]"));
+    const setupHomeHandoff = () => {
+      const homeHero = document.querySelector<HTMLElement>("[data-home-hero]");
+      const workStage = document.querySelector<HTMLElement>("[data-work-stage]");
 
-      if (playVisuals.length === 0) {
+      if (!homeHero || !workStage) {
         return () => {};
       }
 
-      const scrollMotionQuery = window.matchMedia(
-        "(min-width: 721px) and (hover: hover) and (pointer: fine)",
-      );
-      let playMotionFrame: number | undefined;
+      // The home route includes a tiny static-script fallback so this
+      // particular handoff remains available before React hydrates.
+      if (homeHero.dataset.handoffReady === "true") {
+        return () => {};
+      }
 
-      const clearVisualMotion = () => {
-        playVisuals.forEach((visual) => {
-          visual.classList.remove("is-scroll-linked");
-          visual.style.removeProperty("--play-scale");
-          visual.style.removeProperty("--play-blur");
-        });
+      const handoffQuery = window.matchMedia("(min-width: 951px)");
+      let handoffFrame: number | undefined;
+
+      const clearHandoff = () => {
+        homeHero.classList.remove("is-handoff");
+        homeHero.style.removeProperty("--home-handoff-opacity");
+        homeHero.style.removeProperty("--home-handoff-scale");
       };
 
-      const updatePlayMotion = () => {
-        playMotionFrame = undefined;
+      const updateHandoff = () => {
+        handoffFrame = undefined;
 
-        if (!scrollMotionQuery.matches || window.innerHeight <= 0) {
-          clearVisualMotion();
+        if (!handoffQuery.matches || window.innerHeight <= 0) {
+          clearHandoff();
           return;
         }
 
         const viewportHeight = window.innerHeight;
-        const viewportFocus = viewportHeight * 0.5;
+        const stageTop = workStage.getBoundingClientRect().top;
+        // Tie the hero directly to the leading edge of the work sheet. The
+        // broad range keeps the handoff perceptible while avoiding a visible
+        // state change as the work stage moves in front of it.
+        const start = viewportHeight * 0.7;
+        const end = viewportHeight * 0.08;
+        const progress = Math.max(0, Math.min(1, (start - stageTop) / (start - end)));
+        const easedProgress = 1 - Math.pow(1 - progress, 1.5);
 
-        playVisuals.forEach((visual) => {
-          const rect = visual.getBoundingClientRect();
-          const visualCenter = rect.top + rect.height * 0.5;
-          const travel = Math.max(viewportHeight * 0.82, rect.height * 0.9);
-          const focus = Math.max(0, Math.min(1, 1 - Math.abs(visualCenter - viewportFocus) / travel));
-
-          visual.classList.add("is-scroll-linked");
-          visual.style.setProperty("--play-scale", (0.955 + focus * 0.045).toFixed(3));
-          visual.style.setProperty("--play-blur", `${((1 - focus) * 0.45).toFixed(2)}px`);
-        });
+        homeHero.style.setProperty(
+          "--home-handoff-opacity",
+          (1 - easedProgress * 0.36).toFixed(3),
+        );
+        homeHero.style.setProperty(
+          "--home-handoff-scale",
+          (1 - easedProgress * 0.03).toFixed(3),
+        );
       };
 
-      const queuePlayMotion = () => {
-        if (playMotionFrame !== undefined) return;
-        playMotionFrame = window.requestAnimationFrame(updatePlayMotion);
+      const queueHandoff = () => {
+        if (handoffFrame !== undefined) return;
+        handoffFrame = window.requestAnimationFrame(updateHandoff);
       };
 
-      window.addEventListener("scroll", queuePlayMotion, { passive: true });
-      window.addEventListener("resize", queuePlayMotion);
-      scrollMotionQuery.addEventListener("change", queuePlayMotion);
-      queuePlayMotion();
+      window.addEventListener("scroll", queueHandoff, { passive: true });
+      window.addEventListener("resize", queueHandoff);
+      handoffQuery.addEventListener("change", queueHandoff);
+      queueHandoff();
 
       return () => {
-        if (playMotionFrame !== undefined) window.cancelAnimationFrame(playMotionFrame);
-        window.removeEventListener("scroll", queuePlayMotion);
-        window.removeEventListener("resize", queuePlayMotion);
-        scrollMotionQuery.removeEventListener("change", queuePlayMotion);
-        clearVisualMotion();
+        if (handoffFrame !== undefined) window.cancelAnimationFrame(handoffFrame);
+        window.removeEventListener("scroll", queueHandoff);
+        window.removeEventListener("resize", queueHandoff);
+        handoffQuery.removeEventListener("change", queueHandoff);
+        clearHandoff();
       };
     };
 
@@ -155,20 +224,28 @@ export function MotionProvider() {
       root.classList.add("motion-loaded");
     });
 
+    // These two behaviors are scroll-driven rather than reveal-driven, so they
+    // should remain available even if a browser does not support
+    // IntersectionObserver.
+    const cleanupHomeHandoff = setupHomeHandoff();
+    const cleanupWorkMotion = setupWorkMotion();
+
     if (!("IntersectionObserver" in window)) {
       revealElements().forEach((element) => element.classList.add("is-visible"));
       return () => {
         window.cancelAnimationFrame(frameId);
+        cleanupHomeHandoff();
+        cleanupWorkMotion();
       };
     }
 
-    observer = new IntersectionObserver(
+    const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (!entry.isIntersecting) return;
 
           entry.target.classList.add("is-visible");
-          observer?.unobserve(entry.target);
+          observer.unobserve(entry.target);
         });
       },
       {
@@ -177,24 +254,39 @@ export function MotionProvider() {
       },
     );
 
-    revealElements().forEach((element) => observer?.observe(element));
+    const visualRevealObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
 
-    const homeHero = document.querySelector<HTMLElement>("[data-home-hero]");
-    const workIntro = document.querySelector<HTMLElement>("[data-work-intro]");
+          entry.target.classList.add("is-visible");
+          visualRevealObserver.unobserve(entry.target);
+        });
+      },
+      {
+        rootMargin: "0px 0px 12% 0px",
+        threshold: 0.01,
+      },
+    );
 
-    if (homeHero && workIntro) {
-      handoffObserver = new IntersectionObserver(
-        ([entry]) => {
-          homeHero.classList.toggle("is-handoff", entry.isIntersecting);
-        },
-        {
-          rootMargin: "0px 0px -34% 0px",
-          threshold: 0.01,
-        },
-      );
+    let observeFrameId: number | undefined;
+    const observeRevealElements = () => {
+      revealElements().forEach((element) => {
+        if (element.matches("[data-work-visual], [data-visual-reveal]")) {
+          visualRevealObserver.observe(element);
+          return;
+        }
 
-      handoffObserver.observe(workIntro);
-    }
+        observer.observe(element);
+      });
+    };
+
+    // Let the hidden reveal state render first. Without that frame boundary,
+    // images that intersect during initial load can skip straight to their
+    // finished state and look like they pop into the page.
+    observeFrameId = window.requestAnimationFrame(() => {
+      observeFrameId = window.requestAnimationFrame(observeRevealElements);
+    });
 
     const playHero = document.querySelector<HTMLElement>("[data-play-hero]");
     const playProjects = document.querySelector<HTMLElement>("[data-play-projects]");
@@ -213,20 +305,20 @@ export function MotionProvider() {
       playHandoffObserver.observe(playProjects);
     }
 
-    const cleanupWorkMotion = setupWorkMotion();
-    const cleanupPlayMotion = setupPlayMotion();
-
     return () => {
       window.cancelAnimationFrame(frameId);
-      observer?.disconnect();
-      handoffObserver?.disconnect();
+      if (observeFrameId !== undefined) window.cancelAnimationFrame(observeFrameId);
+      observer.disconnect();
+      visualRevealObserver.disconnect();
       playHandoffObserver?.disconnect();
+      cleanupHomeHandoff();
       cleanupWorkMotion();
-      cleanupPlayMotion();
-      homeHero?.classList.remove("is-handoff");
       playHero?.classList.remove("is-handoff");
     };
   }, [pathname]);
 
-  return null;
+  // Rendering a tiny, hidden marker ensures this client boundary is hydrated.
+  // The provider otherwise renders no DOM, which can leave motion effects
+  // unmounted in streamed/static page output.
+  return <span aria-hidden="true" data-motion-provider hidden />;
 }

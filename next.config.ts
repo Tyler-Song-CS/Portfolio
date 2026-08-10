@@ -8,6 +8,11 @@ const nextConfig: NextConfig = {
   basePath,
   output: "export",
   trailingSlash: true,
+  // Hide Next.js's development tools badge from local design reviews.
+  devIndicators: false,
+  // The Codex preview uses 127.0.0.1 while Next may advertise localhost.
+  // Allow both so local hot reload stays connected during design review.
+  allowedDevOrigins: ["127.0.0.1", "localhost"],
   images: {
     unoptimized: true,
   },

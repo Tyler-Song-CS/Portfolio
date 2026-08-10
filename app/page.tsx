@@ -1,5 +1,4 @@
 import Link from "next/link";
-import type { CSSProperties } from "react";
 import { SiteFooter, SiteHeader } from "./components/SiteChrome";
 import { withBasePath } from "./lib/site";
 
@@ -52,23 +51,28 @@ export default function Home() {
 
           <div className="work-stage" data-work-stage>
             <section
-              className="work-intro work-intro--editorial"
+              className="work-intro work-intro--editorial about-intro"
               id="work"
               data-work-intro
-              aria-labelledby="work-title"
+              aria-labelledby="about-title"
             >
-              <div className="site-container work-intro__inner motion-reveal" data-reveal>
-                <p className="eyebrow">Selected work</p>
-                <h2 id="work-title">
-                  <span>A few systems I’ve helped</span>
-                  <span>
-                    <span className="work-intro__keep-together">make easier</span> to use, trust, and ship.
-                  </span>
-                </h2>
+              <div className="site-container work-intro__inner">
+                <div className="about-intro__content">
+                  <h2 id="about-title" className="work-intro__title motion-reveal" data-reveal>
+                    Six years of building modern, reliable applications with an eye for
+                    detail—across enterprise workflows, CNC simulation, and data analysis.
+                  </h2>
+                  <p className="about-intro__summary motion-reveal motion-reveal--copy" data-reveal>
+                    <strong>
+                      I believe the best software makes consequential work feel a little more
+                      straightforward.
+                    </strong>
+                  </p>
+                </div>
               </div>
             </section>
 
-            <section className="site-container work-list" aria-label="Selected work">
+            <section className="site-container work-list" aria-label="Work">
               <article className="work-project work-project--oracle">
               <header className="work-project__header motion-reveal" data-reveal>
                 <div>
@@ -86,8 +90,26 @@ export default function Home() {
                   />
                   <div className="work-visual__caption" aria-hidden="true">
                     <p className="work-visual__title">Oracle</p>
-                    <p className="work-visual__summary">Approval routing for enterprise workflows.</p>
+                    <p className="work-visual__summary">
+                      Approval configuration for Oracle Fusion.
+                    </p>
                   </div>
+                </div>
+                <p className="work-visual__touch-summary sr-only">
+                  <strong>Oracle.</strong> Approval configuration for Oracle Fusion.
+                </p>
+              </div>
+              <div
+                className="work-project__copy work-project__copy--editorial motion-reveal motion-reveal--copy"
+                data-reveal
+              >
+                <h3>A clearer way to route approvals.</h3>
+                <div>
+                  <p>
+                    At Oracle, I built a next-generation approval configuration application from
+                    scratch for Fusion Applications with JavaScript, HTML, and CSS, including
+                    AI-assisted analysis and TypeScript-based test automation.
+                  </p>
                 </div>
               </div>
               <dl className="project-proof motion-reveal" data-reveal>
@@ -104,23 +126,6 @@ export default function Home() {
                   <dd>Web</dd>
                 </div>
               </dl>
-              <div
-                className="work-project__copy work-project__copy--feature motion-reveal motion-reveal--copy"
-                data-reveal
-              >
-                <h3>
-                  A clearer way to
-                  <br />
-                  route approvals.
-                </h3>
-                <div>
-                  <p>
-                    At Oracle, I built a next-generation approval configuration application from
-                    scratch for Fusion Applications with JavaScript, HTML, and CSS, including
-                    AI-assisted analysis and TypeScript-based test automation.
-                  </p>
-                </div>
-              </div>
               </article>
 
               <article className="work-project work-project--cgtech">
@@ -131,34 +136,30 @@ export default function Home() {
                 </div>
                 <p className="meta-label">02 / 03</p>
               </header>
-              <div className="work-project__split">
-                <div className="work-visual work-visual--cgtech" data-reveal data-work-visual>
-                  <div
-                    className="visual-frame visual-frame--cgtech"
-                    role="img"
-                    style={
-                      {
-                        "--work-image": `url("${withBasePath("/cgtech-vericut-optimization.png")}")`,
-                      } as CSSProperties
-                    }
-                    aria-label="VERICUT machining simulation showing a tool cutting an aerospace bracket alongside optimization charts."
-                  >
-                    <div className="work-visual__caption" aria-hidden="true">
-                      <p className="work-visual__title">Vericut</p>
-                      <p className="work-visual__summary">
-                        CNC simulation and machining optimization.
-                      </p>
-                    </div>
+              <div className="work-visual work-visual--cgtech" data-reveal data-work-visual>
+                <div className="visual-frame visual-frame--cgtech">
+                  <img
+                    className="work-screenshot work-screenshot--cgtech"
+                    src={withBasePath("/cgtech-vericut-optimization.png")}
+                    alt="VERICUT machining simulation showing a tool cutting an aerospace bracket alongside optimization charts."
+                  />
+                  <div className="work-visual__caption" aria-hidden="true">
+                    <p className="work-visual__title">Vericut</p>
+                    <p className="work-visual__summary">
+                      CNC simulation that catches issues before machining.
+                    </p>
                   </div>
                 </div>
-                <div className="work-project__copy motion-reveal motion-reveal--copy" data-reveal>
-                  <h3>
-                    Catch machining
-                    <br />
-                    issues before the
-                    <br />
-                    machine does.
-                  </h3>
+                <p className="work-visual__touch-summary sr-only">
+                  <strong>Vericut.</strong> CNC simulation that catches issues before machining.
+                </p>
+              </div>
+              <div
+                className="work-project__copy work-project__copy--editorial motion-reveal motion-reveal--copy"
+                data-reveal
+              >
+                <h3>Catch machining issues before the machine does.</h3>
+                <div>
                   <p>
                     Built C++ and Java desktop software for CNC simulation, helping surface errors
                     and collision risks before machining.
@@ -189,38 +190,35 @@ export default function Home() {
                 </div>
                 <p className="meta-label">03 / 03</p>
               </header>
-              <div className="work-project__split work-project__split--reverse">
-                <div className="work-project__copy motion-reveal motion-reveal--copy" data-reveal>
-                  <h3>
-                    Process large
-                    <br />
-                    data sets
-                    <br />
-                    faster.
-                  </h3>
+              <div className="work-visual work-visual--ucsd" data-reveal data-work-visual>
+                <div className="visual-frame visual-frame--ucsd">
+                  <img
+                    className="work-screenshot work-screenshot--ucsd"
+                    src={withBasePath("/ucsd-cognos-performance-dashboard.png")}
+                    alt="IBM Cognos Analytics sales performance dashboard with revenue charts and country and retailer breakdowns."
+                  />
+                  <div className="work-visual__caption" aria-hidden="true">
+                    <p className="work-visual__title">Donation data workflows</p>
+                    <p className="work-visual__summary">
+                      Faster processing for UC San Diego donation data.
+                    </p>
+                  </div>
+                </div>
+                <p className="work-visual__touch-summary sr-only">
+                  <strong>Donation data workflows.</strong> Faster processing for UC San Diego
+                  donation data.
+                </p>
+              </div>
+              <div
+                className="work-project__copy work-project__copy--editorial motion-reveal motion-reveal--copy"
+                data-reveal
+              >
+                <h3>Process large data sets faster.</h3>
+                <div>
                   <p>
                     Processed UCSD donation data with Cognos Analytics and modernized JavaScript
                     handling hundreds of thousands of rows, reducing load times by up to 50%.
                   </p>
-                </div>
-                <div className="work-visual work-visual--ucsd" data-reveal data-work-visual>
-                  <div
-                    className="visual-frame visual-frame--ucsd"
-                    role="img"
-                    style={
-                      {
-                        "--work-image": `url("${withBasePath("/ucsd-cognos-dashboard.png")}")`,
-                      } as CSSProperties
-                    }
-                    aria-label="IBM Cognos Analytics dashboard showing a high-volume reporting interface."
-                  >
-                    <div className="work-visual__caption" aria-hidden="true">
-                      <p className="work-visual__title">Donation workflows</p>
-                      <p className="work-visual__summary">
-                        High-volume processing for UCSD.
-                      </p>
-                    </div>
-                  </div>
                 </div>
               </div>
               <dl className="project-proof motion-reveal" data-reveal>
