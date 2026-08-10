@@ -2436,14 +2436,12 @@ h3 {
 
   html.motion-active .play-page .play-hero__grid--studio {
     transform-origin: center 58%;
+    opacity: var(--play-handoff-opacity, 1);
+    transform: scale(var(--play-handoff-scale, 1));
     transition:
-      opacity 720ms var(--motion-ease),
-      transform 900ms var(--motion-ease);
-  }
-
-  html.motion-active .play-page .play-hero--editorial.is-handoff .play-hero__grid--studio {
-    opacity: 0.52;
-    transform: scale(0.97);
+      opacity 140ms linear,
+      transform 140ms linear;
+    will-change: opacity, transform;
   }
 }
 
@@ -2971,8 +2969,22 @@ h3 {
 }
 
 @media (min-width: 951px) and (prefers-reduced-motion: no-preference) {
-  .home-page,
+  .home-page {
+    overflow: visible;
+  }
+
   .home-page .top-field {
+    overflow: visible;
+  }
+
+  /* Keep the decorative work-stage curve inside the desktop canvas. */
+  .home-page .top-field::after {
+    right: 1rem;
+    left: 1rem;
+  }
+
+  .play-page,
+  .play-page .top-field {
     overflow: visible;
   }
 }
@@ -2990,6 +3002,16 @@ h3 {
   }
 
   .home-page .home-hero--editorial {
+    min-height: 100svh;
+  }
+
+  .play-page .site-header {
+    position: absolute;
+    inset: 0 0 auto;
+    width: 100%;
+  }
+
+  .play-page .play-hero--editorial {
     min-height: 100svh;
   }
 }

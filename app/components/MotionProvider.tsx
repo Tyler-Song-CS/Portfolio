@@ -13,7 +13,6 @@ export function MotionProvider() {
   useEffect(() => {
     const root = document.documentElement;
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    let playHandoffObserver: IntersectionObserver | undefined;
 
     const revealElements = () =>
       Array.from(document.querySelectorAll<HTMLElement>("[data-reveal]"));
@@ -214,6 +213,66 @@ export function MotionProvider() {
       };
     };
 
+    const setupPlayHandoff = () => {
+      const playHero = document.querySelector<HTMLElement>("[data-play-hero]");
+      const playProjects = document.querySelector<HTMLElement>("[data-play-projects]");
+
+      if (!playHero || !playProjects) {
+        return () => {};
+      }
+
+      const handoffQuery = window.matchMedia("(min-width: 951px)");
+      let handoffFrame: number | undefined;
+
+      const clearHandoff = () => {
+        playHero.style.removeProperty("--play-handoff-opacity");
+        playHero.style.removeProperty("--play-handoff-scale");
+      };
+
+      const updateHandoff = () => {
+        handoffFrame = undefined;
+
+        if (!handoffQuery.matches || window.innerHeight <= 0) {
+          clearHandoff();
+          return;
+        }
+
+        const viewportHeight = window.innerHeight;
+        const stageTop = playProjects.getBoundingClientRect().top;
+        const start = viewportHeight * 0.7;
+        const end = viewportHeight * 0.08;
+        const progress = Math.max(0, Math.min(1, (start - stageTop) / (start - end)));
+        const easedProgress = 1 - Math.pow(1 - progress, 1.5);
+
+        playHero.style.setProperty(
+          "--play-handoff-opacity",
+          (1 - easedProgress * 0.36).toFixed(3),
+        );
+        playHero.style.setProperty(
+          "--play-handoff-scale",
+          (1 - easedProgress * 0.03).toFixed(3),
+        );
+      };
+
+      const queueHandoff = () => {
+        if (handoffFrame !== undefined) return;
+        handoffFrame = window.requestAnimationFrame(updateHandoff);
+      };
+
+      window.addEventListener("scroll", queueHandoff, { passive: true });
+      window.addEventListener("resize", queueHandoff);
+      handoffQuery.addEventListener("change", queueHandoff);
+      queueHandoff();
+
+      return () => {
+        if (handoffFrame !== undefined) window.cancelAnimationFrame(handoffFrame);
+        window.removeEventListener("scroll", queueHandoff);
+        window.removeEventListener("resize", queueHandoff);
+        handoffQuery.removeEventListener("change", queueHandoff);
+        clearHandoff();
+      };
+    };
+
     if (prefersReducedMotion.matches) {
       revealElements().forEach((element) => element.classList.add("is-visible"));
       return;
@@ -228,6 +287,7 @@ export function MotionProvider() {
     // should remain available even if a browser does not support
     // IntersectionObserver.
     const cleanupHomeHandoff = setupHomeHandoff();
+    const cleanupPlayHandoff = setupPlayHandoff();
     const cleanupWorkMotion = setupWorkMotion();
 
     if (!("IntersectionObserver" in window)) {
@@ -235,6 +295,7 @@ export function MotionProvider() {
       return () => {
         window.cancelAnimationFrame(frameId);
         cleanupHomeHandoff();
+        cleanupPlayHandoff();
         cleanupWorkMotion();
       };
     }
@@ -288,32 +349,14 @@ export function MotionProvider() {
       observeFrameId = window.requestAnimationFrame(observeRevealElements);
     });
 
-    const playHero = document.querySelector<HTMLElement>("[data-play-hero]");
-    const playProjects = document.querySelector<HTMLElement>("[data-play-projects]");
-
-    if (playHero && playProjects) {
-      playHandoffObserver = new IntersectionObserver(
-        ([entry]) => {
-          playHero.classList.toggle("is-handoff", entry.isIntersecting);
-        },
-        {
-          rootMargin: "0px 0px -34% 0px",
-          threshold: 0.01,
-        },
-      );
-
-      playHandoffObserver.observe(playProjects);
-    }
-
     return () => {
       window.cancelAnimationFrame(frameId);
       if (observeFrameId !== undefined) window.cancelAnimationFrame(observeFrameId);
       observer.disconnect();
       visualRevealObserver.disconnect();
-      playHandoffObserver?.disconnect();
       cleanupHomeHandoff();
+      cleanupPlayHandoff();
       cleanupWorkMotion();
-      playHero?.classList.remove("is-handoff");
     };
   }, [pathname]);
 
