@@ -43,7 +43,7 @@ export default function Home() {
                   scroll to see work <span className="link-mark" aria-hidden="true">↓</span>
                 </a>
                 <Link className="text-link text-link--quiet" href="/play">
-                  or see what I’m into <span className="link-mark" aria-hidden="true">↗</span>
+                  or see what I make time for <span className="link-mark" aria-hidden="true">↗</span>
                 </Link>
               </div>
             </div>
