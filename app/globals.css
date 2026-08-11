@@ -2033,40 +2033,6 @@ h3 {
   }
 }
 
-@keyframes developer-word-cycle {
-  0%,
-  20% {
-    transform: translate3d(0, 0, 0);
-  }
-
-  25%,
-  45% {
-    transform: translate3d(0, -20%, 0);
-  }
-
-  50%,
-  70% {
-    transform: translate3d(0, -40%, 0);
-  }
-
-  75%,
-  95% {
-    transform: translate3d(0, -60%, 0);
-  }
-
-  100% {
-    transform: translate3d(0, -80%, 0);
-  }
-}
-
-/* Keep the hero verb cycle independent of the optional reveal initializer.
-   The page remains fully still for visitors who prefer reduced motion. */
-@media (prefers-reduced-motion: no-preference) {
-  .editorial-title--developer .editorial-title__rotator-track {
-    animation: developer-word-cycle 12.8s var(--motion-ease) 1.45s infinite;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { HeroRotator } from "./components/HeroRotator";
 import { SiteFooter, SiteHeader } from "./components/SiteChrome";
 import { withBasePath } from "./lib/site";
 
@@ -29,13 +30,7 @@ export default function Home() {
                   className="editorial-title__line editorial-title__rotator motion-intro"
                   aria-hidden="true"
                 >
-                  <span className="editorial-title__rotator-track">
-                    <span>ships.</span>
-                    <span>designs.</span>
-                    <span>builds.</span>
-                    <span>solves.</span>
-                    <span>ships.</span>
-                  </span>
+                  <HeroRotator />
                 </span>
               </h1>
               <div className="hero-actions motion-intro motion-intro--actions">
