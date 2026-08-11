@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 export type NormalizedPoint = readonly [x: number, y: number];
 
@@ -33,6 +33,8 @@ type ProjectDemoVideoProps = {
   screenAspect?: number;
   /** The screen colour visible before the demo loads and around letterboxing. */
   screenFill?: string;
+  /** Adds an explicit, user-initiated sound toggle for a demo with audio. */
+  enableAudioControl?: boolean;
 };
 
 type SceneDefaults = {
@@ -374,10 +376,12 @@ export function ProjectDemoVideo({
   sceneAspect,
   screenAspect,
   screenFill,
+  enableAudioControl = false,
 }: ProjectDemoVideoProps) {
   const sceneRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [audioEnabled, setAudioEnabled] = useState(false);
   const defaults = sceneDefaults[scene];
   const resolvedQuad = screenQuad ?? defaults.screenQuad;
   const resolvedSceneAspect = sceneAspect ?? defaults.sceneAspect;
@@ -393,13 +397,25 @@ export function ProjectDemoVideo({
 
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     let isVisible = false;
+    let hasBeenVisible = false;
 
     const syncPlayback = () => {
       if (reducedMotion.matches || !isVisible) {
+        // The initial observer callback often runs before a button-triggered
+        // scroll finishes. Only clear sound after a card has actually been in
+        // view, so that callback cannot race an intentional tap on the
+        // control itself.
+        if (hasBeenVisible) {
+          // Audio always requires a fresh, intentional tap when the demo
+          // comes back into view. The projected visual can resume silently.
+          video.muted = true;
+          setAudioEnabled(false);
+        }
         video.pause();
         return;
       }
 
+      hasBeenVisible = true;
       void video.play().catch(() => {
         // Browsers may still decline autoplay; the poster remains a complete
         // visual fallback in that case.
@@ -625,41 +641,93 @@ export function ProjectDemoVideo({
     };
   }, [poster, quadKey, resolvedAspect, resolvedFill, resolvedQuad, resolvedSceneAspect]);
 
+  const toggleAudio = () => {
+    const video = videoRef.current;
+
+    if (!video) return;
+
+    const shouldEnableAudio = !audioEnabled;
+
+    // Update both the media element and the control immediately. The click is
+    // the user gesture browsers require for audible playback; the existing
+    // in-view visual playback continues uninterrupted either way.
+    video.muted = !shouldEnableAudio;
+    video.defaultMuted = !shouldEnableAudio;
+    video.volume = 1;
+    setAudioEnabled(shouldEnableAudio);
+
+    if (!shouldEnableAudio) return;
+
+    void video.play().catch(() => {
+      // If a browser still declines audible playback, return the control to
+      // its truthful muted state without affecting the visual fallback.
+      video.muted = true;
+      video.defaultMuted = true;
+      setAudioEnabled(false);
+    });
+  };
+
   return (
-    <div ref={sceneRef} className={`project-demo-scene project-demo-scene--${scene}`}>
-      <img className="project-demo-scene__image" src={sceneImage} alt="" aria-hidden="true" />
-      <canvas
-        ref={canvasRef}
-        aria-hidden="true"
-        className="project-demo-scene__canvas"
-        style={{
-          position: "absolute",
-          inset: 0,
-          zIndex: 1,
-          display: "block",
-          width: "100%",
-          height: "100%",
-          pointerEvents: "none",
-        }}
-      />
-      <video
-        ref={videoRef}
-        aria-label={label}
-        loop
-        muted
-        playsInline
-        poster={poster}
-        preload="metadata"
-        style={{
-          position: "absolute",
-          width: 1,
-          height: 1,
-          opacity: 0,
-          pointerEvents: "none",
-        }}
-      >
-        <source src={src} type="video/mp4" />
-      </video>
-    </div>
+    <>
+      <div ref={sceneRef} className={`project-demo-scene project-demo-scene--${scene}`}>
+        <img className="project-demo-scene__image" src={sceneImage} alt="" aria-hidden="true" />
+        <canvas
+          ref={canvasRef}
+          aria-hidden="true"
+          className="project-demo-scene__canvas"
+          style={{
+            position: "absolute",
+            inset: 0,
+            zIndex: 1,
+            display: "block",
+            width: "100%",
+            height: "100%",
+            pointerEvents: "none",
+          }}
+        />
+        <video
+          ref={videoRef}
+          aria-label={label}
+          loop
+          muted={!audioEnabled}
+          playsInline
+          poster={poster}
+          preload="metadata"
+          style={{
+            position: "absolute",
+            width: 1,
+            height: 1,
+            opacity: 0,
+            pointerEvents: "none",
+          }}
+        >
+          <source src={src} type="video/mp4" />
+        </video>
+      </div>
+
+      {enableAudioControl ? (
+        <button
+          aria-label={audioEnabled ? "Mute Mini Guitar demo sound" : "Play Mini Guitar demo sound"}
+          aria-pressed={audioEnabled}
+          className="project-demo-scene__audio-toggle"
+          data-audio-toggle="mini-guitar"
+          onClick={toggleAudio}
+          type="button"
+        >
+          <span aria-hidden="true" className="project-demo-scene__audio-icon">
+            {audioEnabled ? (
+              <svg viewBox="0 0 24 24" focusable="false">
+                <path d="M4 10v4h4l5 4V6L8 10H4Z" />
+                <path d="m17 9 4 4m0-4-4 4" />
+              </svg>
+            ) : (
+              <svg viewBox="0 0 24 24" focusable="false">
+                <path d="m8 5 11 7-11 7V5Z" />
+              </svg>
+            )}
+          </span>
+        </button>
+      ) : null}
+    </>
   );
 }

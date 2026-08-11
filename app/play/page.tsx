@@ -28,25 +28,25 @@ const activities = [
     id: "tennis",
     number: "01",
     title: "Tennis.",
-    note: "A reset between screens.",
+    label: "Tennis photo gallery",
   },
   {
     id: "pottery",
     number: "02",
     title: "Pottery.",
-    note: "Hands in clay, mind elsewhere.",
+    label: "Pottery photo gallery",
   },
   {
     id: "shelter",
     number: "03",
     title: "Cat shelter volunteering.",
-    note: "A small weekly act of care.",
+    label: "Cat shelter volunteering photo gallery",
   },
   {
-    id: "next",
+    id: "travel",
     number: "04",
-    title: "Something next.",
-    note: "Another thing worth making time for.",
+    title: "Travel.",
+    label: "Travel photo gallery",
   },
 ];
 
@@ -118,7 +118,8 @@ export default function PlayPage() {
                         data-visual-reveal
                       >
                         <ProjectDemoVideo
-                          label="Muted Mini Guitar app demo showing song sections, chord progressions, and a playable guitar."
+                          enableAudioControl
+                          label="Mini Guitar app demo showing song sections, chord progressions, and a playable guitar."
                           poster={withBasePath("/mini-guitar-demo-poster.png")}
                           scene="mini-guitar"
                           sceneImage={withBasePath("/side-project-scenes/mini-guitar-iphone13-scene.png")}
@@ -180,14 +181,140 @@ export default function PlayPage() {
                     data-reveal
                     key={activity.id}
                   >
+                    <div className="activity-media" aria-label={activity.label}>
+                      {activity.id === "tennis" ? (
+                        <>
+                          <figure className="activity-media__photo activity-media__photo--primary">
+                            <img
+                              alt="Tyler and fellow players holding racquets on a tennis court."
+                              decoding="async"
+                              loading="lazy"
+                              src={withBasePath("/activities/tennis-court.jpg")}
+                            />
+                          </figure>
+                          <figure className="activity-media__photo activity-media__photo--secondary">
+                            <img
+                              alt="Tyler with friends at Indian Wells Tennis Paradise."
+                              decoding="async"
+                              loading="lazy"
+                              src={withBasePath("/activities/tennis-paradise.jpg")}
+                            />
+                          </figure>
+                        </>
+                      ) : activity.id === "pottery" ? (
+                        <>
+                          <figure className="activity-media__photo activity-media__photo--four">
+                            <img
+                              alt="Orange flowers arranged in a handmade white vase."
+                              decoding="async"
+                              loading="lazy"
+                              src={withBasePath("/activities/pottery-flowers.jpg")}
+                            />
+                          </figure>
+                          <figure className="activity-media__photo activity-media__photo--two">
+                            <img
+                              alt="A collection of handmade ceramic mugs."
+                              decoding="async"
+                              loading="lazy"
+                              src={withBasePath("/activities/pottery-mugs.jpg")}
+                            />
+                          </figure>
+                          <figure className="activity-media__photo activity-media__photo--one">
+                            <img
+                              alt="A red glazed bowl made by Tyler."
+                              decoding="async"
+                              loading="lazy"
+                              src={withBasePath("/activities/pottery-red-bowl.jpg")}
+                            />
+                          </figure>
+                          <figure className="activity-media__photo activity-media__photo--three">
+                            <img
+                              alt="A group of handmade ceramic vases in the studio."
+                              decoding="async"
+                              loading="lazy"
+                              src={withBasePath("/activities/pottery-vases.jpg")}
+                            />
+                          </figure>
+                        </>
+                      ) : activity.id === "shelter" ? (
+                        <>
+                          <figure className="activity-media__photo activity-media__photo--one">
+                            <img
+                              alt="A shelter kitten reflected in a round mirror."
+                              decoding="async"
+                              loading="lazy"
+                              src={withBasePath("/activities/cat-shelter-mirror.jpg")}
+                            />
+                          </figure>
+                          <figure className="activity-media__photo activity-media__photo--two">
+                            <img
+                              alt="A large cat sculpture outside Nine Lives Foundation."
+                              decoding="async"
+                              loading="lazy"
+                              src={withBasePath("/activities/cat-shelter-mascot.jpg")}
+                            />
+                          </figure>
+                          <figure className="activity-media__photo activity-media__photo--three">
+                            <img
+                              alt="A shelter kitten wearing a red striped bow tie."
+                              decoding="async"
+                              loading="lazy"
+                              src={withBasePath("/activities/cat-shelter-bowtie.jpg")}
+                            />
+                          </figure>
+                          <figure className="activity-media__photo activity-media__photo--four">
+                            <img
+                              alt="Two shelter kittens curled up together beneath a chair."
+                              decoding="async"
+                              loading="lazy"
+                              src={withBasePath("/activities/cat-shelter-nap.jpg")}
+                            />
+                          </figure>
+                        </>
+                      ) : (
+                        <>
+                          <div className="activity-media__column activity-media__column--wide">
+                            <figure className="activity-media__photo activity-media__photo--one">
+                              <img
+                                alt="Tyler reflected in a playful Paint-themed installation."
+                                decoding="async"
+                                loading="lazy"
+                                src={withBasePath("/activities/travel-paint.jpg")}
+                              />
+                            </figure>
+                            <figure className="activity-media__photo activity-media__photo--two">
+                              <img
+                                alt="Tyler at the Banff sign with mountain scenery behind him."
+                                decoding="async"
+                                loading="lazy"
+                                src={withBasePath("/activities/travel-banff.jpg")}
+                              />
+                            </figure>
+                          </div>
+                          <div className="activity-media__column activity-media__column--tall">
+                            <figure className="activity-media__photo activity-media__photo--three">
+                              <img
+                                alt="Tyler standing in a colorful immersive installation."
+                                decoding="async"
+                                loading="lazy"
+                                src={withBasePath("/activities/travel-yellow-gallery.jpg")}
+                              />
+                            </figure>
+                            <figure className="activity-media__photo activity-media__photo--four">
+                              <img
+                                alt="Tyler surrounded by blue light in an immersive installation."
+                                decoding="async"
+                                loading="lazy"
+                                src={withBasePath("/activities/travel-blue-gallery.jpg")}
+                              />
+                            </figure>
+                          </div>
+                        </>
+                      )}
+                    </div>
                     <div className="activity-card__copy">
                       <p className="meta-label">{activity.number}</p>
                       <h3>{activity.title}</h3>
-                      <p>{activity.note}</p>
-                    </div>
-                    <div className="activity-media">
-                      <div className="activity-media__photo activity-media__photo--primary" />
-                      <div className="activity-media__photo activity-media__photo--secondary" />
                     </div>
                   </article>
                 ))}

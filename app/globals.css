@@ -2282,6 +2282,76 @@ h3 {
   object-fit: cover;
 }
 
+/* The source video is projected inside a transformed photo scene. Keep the
+   audio control outside that transformed layer so its size and tap target stay
+   consistent at every crop and breakpoint. */
+.project-demo-scene__audio-toggle {
+  position: absolute;
+  bottom: clamp(0.75rem, 1.75vw, 1.15rem);
+  left: clamp(0.75rem, 1.75vw, 1.15rem);
+  z-index: 3;
+  display: inline-flex;
+  width: 2.75rem;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgb(255 250 241 / 0.84);
+  border-radius: 999px;
+  background: rgb(37 72 199 / 0.96);
+  box-shadow: 0 0.5rem 1.2rem rgb(18 18 20 / 0.28);
+  color: #fffaf1;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: clamp(0.66rem, 0.9vw, 0.76rem);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  padding: 0;
+  transition:
+    background-color 220ms var(--motion-ease),
+    border-color 220ms var(--motion-ease),
+    box-shadow 220ms var(--motion-ease),
+    transform 220ms var(--motion-ease);
+}
+
+.project-demo-scene__audio-toggle[aria-pressed="true"] {
+  border-color: rgb(255 250 241 / 0.95);
+  background: var(--signal-orange);
+}
+
+.project-demo-scene__audio-icon {
+  display: inline-grid;
+  width: 1rem;
+  place-items: center;
+}
+
+.project-demo-scene__audio-icon svg {
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.project-demo-scene__audio-icon svg path:first-child {
+  fill: currentColor;
+  stroke: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .project-demo-scene__audio-toggle:hover {
+    box-shadow: 0 0.72rem 1.45rem rgb(18 18 20 / 0.36);
+    transform: translate3d(0, -0.12rem, 0);
+  }
+}
+
+.project-demo-scene__audio-toggle:focus-visible {
+  outline: 3px solid var(--signal-orange);
+  outline-offset: 3px;
+}
+
 .project-card__copy {
   max-width: 25rem;
   margin-top: clamp(1rem, 2vw, 1.4rem);
@@ -2313,8 +2383,8 @@ h3 {
 
 .activity-gallery {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: clamp(3.5rem, 7vw, 7.25rem) clamp(1.25rem, 4.4vw, 5rem);
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(3.25rem, 6vw, 6rem);
   margin-top: clamp(1.8rem, 3.5vw, 3rem);
 }
 
@@ -2323,50 +2393,45 @@ h3 {
   min-width: 0;
 }
 
+.activity-card__copy {
+  margin-top: clamp(0.95rem, 1.8vw, 1.35rem);
+}
+
+.activity-card__copy h3 {
+  margin-top: 0.5rem;
+  font-family: var(--caption);
+  font-size: clamp(2rem, 3.35vw, 3.5rem);
+  font-weight: 500;
+  letter-spacing: -0.07em;
+  line-height: 0.94;
+}
+
 .activity-card--tennis {
   --activity-field: #cbdafa;
   --activity-primary: #b7cdf5;
   --activity-secondary: #eff4ff;
+  grid-column: 1 / -1;
 }
 
 .activity-card--pottery {
   --activity-field: #f8d4bb;
   --activity-primary: #efb088;
   --activity-secondary: #fff0e4;
+  grid-column: 1 / -1;
 }
 
 .activity-card--shelter {
-  --activity-field: #e1d8f1;
-  --activity-primary: #c7b5e7;
-  --activity-secondary: #f8f1ff;
+  --activity-field: #e1eee7;
+  --activity-primary: #c9dccc;
+  --activity-secondary: #f0f7f0;
+  grid-column: 1 / -1;
 }
 
-.activity-card--next {
-  --activity-field: #f3dfae;
-  --activity-primary: #e7c76f;
-  --activity-secondary: #fff5d8;
-}
-
-.activity-card__copy {
-  max-width: 21rem;
-}
-
-.activity-card__copy h3 {
-  margin-top: 0.65rem;
-  font-family: Georgia, "Iowan Old Style", "Times New Roman", serif;
-  font-size: clamp(2.35rem, 4.5vw, 4.2rem);
-  font-weight: 500;
-  letter-spacing: -0.083em;
-  line-height: 0.91;
-}
-
-.activity-card__copy > p:not(.meta-label) {
-  margin-top: 0.8rem;
-  color: var(--ink-soft);
-  font-family: var(--caption);
-  font-size: clamp(0.9rem, 1.18vw, 1.05rem);
-  letter-spacing: -0.015em;
-  line-height: 1.34;
+.activity-card--travel {
+  --activity-field: #dce1f8;
+  --activity-primary: #c3cdf4;
+  --activity-secondary: #f0f2ff;
+  grid-column: 1 / -1;
 }
 
 .activity-media {
@@ -2425,6 +2490,211 @@ h3 {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+/* Tennis is intentionally a feature, not another square tile: its paired
+   photos keep their native proportions in one calm, side-by-side composition. */
+.activity-card--tennis .activity-media {
+  display: grid;
+  grid-template-columns: 9fr 8fr;
+  gap: clamp(0.75rem, 1.5vw, 1.25rem);
+  margin-top: 0;
+  aspect-ratio: 17 / 7;
+  background: transparent;
+}
+
+.activity-card--tennis .activity-media__photo {
+  position: relative;
+  inset: auto;
+  width: auto;
+  height: auto;
+}
+
+.activity-card--tennis .activity-media__photo--primary {
+  background: var(--activity-primary);
+}
+
+.activity-card--tennis .activity-media__photo--secondary {
+  background: var(--activity-secondary);
+}
+
+.activity-card--tennis .activity-media__photo--primary img {
+  object-position: center 52%;
+}
+
+.activity-card--tennis .activity-media__photo--secondary img {
+  object-position: center 55%;
+}
+
+/* Shared gallery base. Each activity specializes it below to preserve the
+   natural proportions that make its photographs read as a visual chapter. */
+.activity-card--pottery .activity-media,
+.activity-card--shelter .activity-media,
+.activity-card--travel .activity-media {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: clamp(0.65rem, 1.1vw, 1rem);
+  margin-top: 0;
+  aspect-ratio: 16 / 10;
+  background: transparent;
+}
+
+/* The pottery photos deliberately retain their native 3:4 and 4:3 shapes.
+   Each desktop column therefore has one portrait over one landscape, keeping
+   the flowers, vase, and bowl fully in frame instead of forcing them into
+   the short contact-sheet cells used by the other activity galleries. */
+.activity-card--pottery .activity-media {
+  grid-template-rows: 16fr 9fr;
+  aspect-ratio: 24 / 25;
+}
+
+.activity-card--pottery .activity-media__photo,
+.activity-card--shelter .activity-media__photo,
+.activity-card--travel .activity-media__photo {
+  position: relative;
+  inset: auto;
+  width: auto;
+  height: auto;
+}
+
+.activity-card--pottery .activity-media__photo--one,
+.activity-card--shelter .activity-media__photo--one,
+.activity-card--travel .activity-media__photo--one {
+  grid-area: 1 / 1 / 2 / 2;
+}
+
+.activity-card--pottery .activity-media__photo--two,
+.activity-card--shelter .activity-media__photo--two,
+.activity-card--travel .activity-media__photo--two {
+  grid-area: 1 / 2 / 2 / 3;
+}
+
+.activity-card--pottery .activity-media__photo--three,
+.activity-card--shelter .activity-media__photo--three,
+.activity-card--travel .activity-media__photo--three {
+  grid-area: 2 / 1 / 3 / 2;
+}
+
+.activity-card--pottery .activity-media__photo--four,
+.activity-card--shelter .activity-media__photo--four,
+.activity-card--travel .activity-media__photo--four {
+  grid-area: 2 / 2 / 3 / 3;
+}
+
+.activity-card--pottery .activity-media__photo--four {
+  grid-area: 1 / 1 / 2 / 2;
+  aspect-ratio: 3 / 4;
+}
+
+.activity-card--pottery .activity-media__photo--two {
+  grid-area: 2 / 1 / 3 / 2;
+  aspect-ratio: 4 / 3;
+}
+
+.activity-card--pottery .activity-media__photo--one {
+  grid-area: 1 / 2 / 2 / 3;
+  aspect-ratio: 3 / 4;
+}
+
+.activity-card--pottery .activity-media__photo--three {
+  grid-area: 2 / 2 / 3 / 3;
+  aspect-ratio: 4 / 3;
+}
+
+/* The shelter set is four portrait photographs. A two-by-two desktop grid
+   keeps each full composition in view instead of fitting them into shallow
+   landscape contact-sheet cells. */
+.activity-card--shelter .activity-media {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: none;
+  aspect-ratio: auto;
+}
+
+.activity-card--shelter .activity-media__photo {
+  grid-area: auto;
+  aspect-ratio: 3 / 4;
+}
+
+/* Travel pairs the Paint portrait and Banff scene in a wide column with the
+   two tall gallery portraits beside them. The proportional columns make both
+   stacks finish together without cropping any scene. */
+.activity-card--travel .activity-media {
+  --travel-gallery-gap: clamp(0.65rem, 1.1vw, 1rem);
+  grid-template-columns: 384fr 225fr;
+  grid-template-rows: none;
+  gap: var(--travel-gallery-gap);
+  aspect-ratio: auto;
+}
+
+.activity-card--travel .activity-media__column {
+  display: grid;
+  min-width: 0;
+  gap: var(--travel-gallery-gap);
+}
+
+.activity-card--travel .activity-media__photo {
+  grid-area: auto;
+  width: 100%;
+  height: auto;
+}
+
+.activity-card--travel .activity-media__photo--one {
+  aspect-ratio: 3 / 4;
+}
+
+.activity-card--travel .activity-media__photo--two {
+  aspect-ratio: 4 / 3;
+}
+
+.activity-card--travel .activity-media__photo--three,
+.activity-card--travel .activity-media__photo--four {
+  aspect-ratio: 9 / 16;
+}
+
+.activity-card--pottery .activity-media__photo--one img {
+  object-position: center 56%;
+}
+
+.activity-card--pottery .activity-media__photo--two img,
+.activity-card--pottery .activity-media__photo--three img {
+  object-position: center 55%;
+}
+
+.activity-card--pottery .activity-media__photo--four img {
+  object-position: center 50%;
+}
+
+.activity-card--shelter .activity-media__photo--one img {
+  object-position: 38% 40%;
+}
+
+.activity-card--shelter .activity-media__photo--two img {
+  object-position: center 35%;
+}
+
+.activity-card--shelter .activity-media__photo--three img {
+  object-position: center 48%;
+}
+
+.activity-card--shelter .activity-media__photo--four img {
+  object-position: center 52%;
+}
+
+.activity-card--travel .activity-media__photo--one img {
+  object-position: center 50%;
+}
+
+.activity-card--travel .activity-media__photo--two img {
+  object-position: center 46%;
+}
+
+.activity-card--travel .activity-media__photo--three img {
+  object-position: center 47%;
+}
+
+.activity-card--travel .activity-media__photo--four img {
+  object-position: center 49%;
 }
 
 @media (min-width: 951px) and (prefers-reduced-motion: no-preference) {
@@ -2523,6 +2793,22 @@ h3 {
   .activity-card:nth-child(even):hover .activity-media__photo--secondary {
     transform: translate3d(calc(-1 * var(--collage-shift)), var(--collage-shift), 0)
       rotate(-0.7deg);
+  }
+
+  .activity-card--tennis:hover .activity-media__photo--primary {
+    transform: translate3d(0, -0.2rem, 0) scale(1.008);
+  }
+
+  .activity-card--tennis:hover .activity-media__photo--secondary {
+    box-shadow: 0 0.9rem 1.5rem rgb(41 38 33 / 0.17);
+    transform: translate3d(0, -0.2rem, 0) scale(1.008);
+  }
+
+  .activity-card--pottery:hover .activity-media__photo,
+  .activity-card--shelter:hover .activity-media__photo,
+  .activity-card--travel:hover .activity-media__photo {
+    box-shadow: 0 0.82rem 1.38rem rgb(41 38 33 / 0.15);
+    transform: translate3d(0, -0.18rem, 0);
   }
 
 }
@@ -2645,12 +2931,108 @@ h3 {
     aspect-ratio: 4 / 3;
   }
 
-  .activity-card__copy h3 {
-    font-size: clamp(2.25rem, 10.5vw, 3.6rem);
-  }
-
   .activity-media {
     max-width: 37rem;
+  }
+
+  /* On touch-sized screens, show the two Tennis photos one after another
+     rather than preserving a desktop overlap that would shrink their faces. */
+  .activity-card--tennis,
+  .activity-card--pottery,
+  .activity-card--shelter,
+  .activity-card--travel {
+    display: block;
+    grid-column: auto;
+  }
+
+  .activity-card--tennis .activity-media {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
+    max-width: none;
+    aspect-ratio: auto;
+    gap: 0.85rem;
+    margin-top: 0;
+    overflow: visible;
+  }
+
+  .activity-card--tennis .activity-media__photo {
+    position: relative;
+    inset: auto;
+    right: auto;
+    bottom: auto;
+    width: 100%;
+    height: auto;
+    transform: none;
+  }
+
+  .activity-card--tennis .activity-media__photo--primary {
+    aspect-ratio: 3 / 2;
+  }
+
+  .activity-card--tennis .activity-media__photo--secondary {
+    aspect-ratio: 4 / 3;
+  }
+
+  .activity-card--pottery .activity-media,
+  .activity-card--shelter .activity-media,
+  .activity-card--travel .activity-media {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+    width: 100%;
+    max-width: none;
+    aspect-ratio: auto;
+    gap: 0.85rem;
+    margin-top: 0;
+    overflow: visible;
+  }
+
+  .activity-card--pottery .activity-media__photo,
+  .activity-card--shelter .activity-media__photo,
+  .activity-card--travel .activity-media__photo {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    height: auto;
+    transform: none;
+  }
+
+  .activity-card--pottery .activity-media__photo--one,
+  .activity-card--pottery .activity-media__photo--four,
+  .activity-card--shelter .activity-media__photo--one,
+  .activity-card--shelter .activity-media__photo--two,
+  .activity-card--shelter .activity-media__photo--three,
+  .activity-card--shelter .activity-media__photo--four,
+  .activity-card--travel .activity-media__photo--one,
+  .activity-card--travel .activity-media__photo--two,
+  .activity-card--travel .activity-media__photo--three,
+  .activity-card--travel .activity-media__photo--four {
+    grid-area: auto;
+    aspect-ratio: 3 / 4;
+  }
+
+  .activity-card--pottery .activity-media__photo--two,
+  .activity-card--pottery .activity-media__photo--three {
+    grid-area: auto;
+    aspect-ratio: 4 / 3;
+  }
+
+  .activity-card--travel .activity-media {
+    --travel-gallery-gap: 0.85rem;
+  }
+
+  .activity-card--travel .activity-media__photo--one {
+    aspect-ratio: 3 / 4;
+  }
+
+  .activity-card--travel .activity-media__photo--two {
+    aspect-ratio: 4 / 3;
+  }
+
+  .activity-card--travel .activity-media__photo--three,
+  .activity-card--travel .activity-media__photo--four {
+    aspect-ratio: 9 / 16;
   }
 }
 
