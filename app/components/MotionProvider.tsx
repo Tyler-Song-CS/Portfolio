@@ -17,74 +17,86 @@ export function MotionProvider() {
     const revealElements = () =>
       Array.from(document.querySelectorAll<HTMLElement>("[data-reveal]"));
 
+    const mediaRevealElements = () =>
+      Array.from(
+        document.querySelectorAll<HTMLElement>("[data-work-visual], [data-media-reveal]"),
+      );
+
+    // Keep media-bearing reveals hidden until their images have decoded. This
+    // lets the browser retain native lazy loading while preventing a card from
+    // animating in before its visual content is ready to paint.
+    const setupMediaReadiness = () => {
+      const mediaTargets = mediaRevealElements();
+
+      if (mediaTargets.length === 0) {
+        return () => {};
+      }
+
+      const cleanupListeners: Array<() => void> = [];
+
+      mediaTargets.forEach((target) => {
+        const images = Array.from(target.querySelectorAll("img"));
+
+        if (images.length === 0) {
+          target.classList.add("is-image-ready");
+          return;
+        }
+
+        let pendingImages = images.length;
+
+        const markTargetReady = () => {
+          pendingImages -= 1;
+
+          if (pendingImages === 0) {
+            target.classList.add("is-image-ready");
+          }
+        };
+
+        images.forEach((image) => {
+          let settled = false;
+
+          const markImageReady = () => {
+            if (settled) return;
+
+            settled = true;
+            markTargetReady();
+          };
+
+          const decodeImage = () => {
+            if (typeof image.decode !== "function") {
+              markImageReady();
+              return;
+            }
+
+            void image.decode().then(markImageReady).catch(markImageReady);
+          };
+
+          if (image.complete) {
+            decodeImage();
+            return;
+          }
+
+          image.addEventListener("load", decodeImage, { once: true });
+          image.addEventListener("error", markImageReady, { once: true });
+          cleanupListeners.push(() => {
+            image.removeEventListener("load", decodeImage);
+            image.removeEventListener("error", markImageReady);
+          });
+        });
+      });
+
+      return () => {
+        cleanupListeners.forEach((cleanup) => cleanup());
+        mediaTargets.forEach((target) => target.classList.remove("is-image-ready"));
+      };
+    };
+
     const setupWorkMotion = () => {
       const workVisuals = Array.from(document.querySelectorAll<HTMLElement>("[data-work-visual]"));
 
       if (workVisuals.length === 0) {
         return () => {};
       }
-
-      const setupImageReadiness = () => {
-        const cleanupListeners: Array<() => void> = [];
-
-        workVisuals.forEach((visual) => {
-          const images = Array.from(visual.querySelectorAll("img"));
-
-          if (images.length === 0) {
-            visual.classList.add("is-image-ready");
-            return;
-          }
-
-          let pendingImages = images.length;
-
-          const markVisualReady = () => {
-            pendingImages -= 1;
-
-            if (pendingImages === 0) {
-              visual.classList.add("is-image-ready");
-            }
-          };
-
-          images.forEach((image) => {
-            let settled = false;
-
-            const markImageReady = () => {
-              if (settled) return;
-
-              settled = true;
-              markVisualReady();
-            };
-
-            const decodeImage = () => {
-              if (typeof image.decode !== "function") {
-                markImageReady();
-                return;
-              }
-
-              void image.decode().then(markImageReady).catch(markImageReady);
-            };
-
-            if (image.complete) {
-              decodeImage();
-              return;
-            }
-
-            image.addEventListener("load", decodeImage, { once: true });
-            image.addEventListener("error", markImageReady, { once: true });
-            cleanupListeners.push(() => {
-              image.removeEventListener("load", decodeImage);
-              image.removeEventListener("error", markImageReady);
-            });
-          });
-        });
-
-        return () => {
-          cleanupListeners.forEach((cleanup) => cleanup());
-          workVisuals.forEach((visual) => visual.classList.remove("is-image-ready"));
-        };
-      };
-
-      const cleanupImageReadiness = setupImageReadiness();
 
       const scrollMotionQuery = window.matchMedia(
         "(min-width: 721px) and (hover: hover) and (pointer: fine)",
@@ -138,7 +150,6 @@ export function MotionProvider() {
         window.removeEventListener("scroll", queueWorkMotion);
         window.removeEventListener("resize", queueWorkMotion);
         scrollMotionQuery.removeEventListener("change", queueWorkMotion);
-        cleanupImageReadiness();
         clearVisualMotion();
       };
     };
@@ -288,14 +299,20 @@ export function MotionProvider() {
     // IntersectionObserver.
     const cleanupHomeHandoff = setupHomeHandoff();
     const cleanupPlayHandoff = setupPlayHandoff();
+    const cleanupMediaReadiness = setupMediaReadiness();
     const cleanupWorkMotion = setupWorkMotion();
 
     if (!("IntersectionObserver" in window)) {
+      // Do not leave lazy media behind a motion-only readiness gate when the
+      // browser cannot observe its entry point. The static page remains fully
+      // usable, and native image loading can proceed normally.
+      root.classList.remove("motion-active");
       revealElements().forEach((element) => element.classList.add("is-visible"));
       return () => {
         window.cancelAnimationFrame(frameId);
         cleanupHomeHandoff();
         cleanupPlayHandoff();
+        cleanupMediaReadiness();
         cleanupWorkMotion();
       };
     }
@@ -333,7 +350,7 @@ export function MotionProvider() {
     let observeFrameId: number | undefined;
     const observeRevealElements = () => {
       revealElements().forEach((element) => {
-        if (element.matches("[data-work-visual], [data-visual-reveal]")) {
+        if (element.matches("[data-work-visual], [data-visual-reveal], [data-media-reveal]")) {
           visualRevealObserver.observe(element);
           return;
         }
@@ -356,6 +373,7 @@ export function MotionProvider() {
       visualRevealObserver.disconnect();
       cleanupHomeHandoff();
       cleanupPlayHandoff();
+      cleanupMediaReadiness();
       cleanupWorkMotion();
     };
   }, [pathname]);

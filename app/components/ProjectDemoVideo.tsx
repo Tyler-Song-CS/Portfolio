@@ -382,12 +382,63 @@ export function ProjectDemoVideo({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [audioEnabled, setAudioEnabled] = useState(false);
+  const [isSceneImageReady, setIsSceneImageReady] = useState(false);
+  const [isPosterReady, setIsPosterReady] = useState(false);
   const defaults = sceneDefaults[scene];
   const resolvedQuad = screenQuad ?? defaults.screenQuad;
   const resolvedSceneAspect = sceneAspect ?? defaults.sceneAspect;
   const resolvedAspect = screenAspect ?? defaults.screenAspect;
   const resolvedFill = screenFill ?? defaults.screenFill;
   const quadKey = useMemo(() => resolvedQuad.flat().join(","), [resolvedQuad]);
+
+  useEffect(() => {
+    const sceneElement = sceneRef.current;
+    const image = sceneElement?.querySelector<HTMLImageElement>(".project-demo-scene__image");
+
+    if (!image) {
+      // A missing image is still a settled fallback state: do not leave the
+      // surrounding card hidden forever if its markup changes unexpectedly.
+      setIsSceneImageReady(true);
+      return;
+    }
+
+    let isCurrent = true;
+    const markReady = () => {
+      if (isCurrent) setIsSceneImageReady(true);
+    };
+    const decodeImage = () => {
+      // `decode()` ensures a cached image has actually been decoded before
+      // the card's reveal can run. A decode failure is equivalent to the
+      // image error fallback for readiness purposes.
+      if (typeof image.decode !== "function") {
+        markReady();
+        return;
+      }
+
+      void image.decode().catch(() => undefined).then(markReady);
+    };
+    const handleLoad = () => decodeImage();
+    const handleError = () => markReady();
+
+    setIsSceneImageReady(false);
+
+    if (image.complete) {
+      if (image.naturalWidth > 0) {
+        decodeImage();
+      } else {
+        handleError();
+      }
+    } else {
+      image.addEventListener("load", handleLoad);
+      image.addEventListener("error", handleError);
+    }
+
+    return () => {
+      isCurrent = false;
+      image.removeEventListener("load", handleLoad);
+      image.removeEventListener("error", handleError);
+    };
+  }, [sceneImage]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -446,7 +497,13 @@ export function ProjectDemoVideo({
     const canvas = canvasRef.current;
     const video = videoRef.current;
 
-    if (!canvas || !video) return;
+    if (!canvas || !video) {
+      // If the projected poster cannot initialize, the scene image remains a
+      // complete fallback. Treat this as a settled error rather than keeping
+      // its parent card hidden indefinitely.
+      setIsPosterReady(true);
+      return;
+    }
 
     const homography = createScreenHomography(resolvedQuad);
     const inverseHomography = homography && invertMatrix3(homography);
@@ -456,7 +513,10 @@ export function ProjectDemoVideo({
       antialias: true,
     });
 
-    if (!gl || !inverseHomography) return;
+    if (!gl || !inverseHomography) {
+      setIsPosterReady(true);
+      return;
+    }
 
     const program = createProgram(gl);
     const buffer = gl.createBuffer();
@@ -466,6 +526,7 @@ export function ProjectDemoVideo({
       if (program) gl.deleteProgram(program);
       if (buffer) gl.deleteBuffer(buffer);
       if (texture) gl.deleteTexture(texture);
+      setIsPosterReady(true);
       return;
     }
 
@@ -493,6 +554,7 @@ export function ProjectDemoVideo({
       gl.deleteProgram(program);
       gl.deleteBuffer(buffer);
       gl.deleteTexture(texture);
+      setIsPosterReady(true);
       return;
     }
 
@@ -523,10 +585,17 @@ export function ProjectDemoVideo({
     let posterLoaded = false;
     let posterAspect = resolvedAspect;
     let canvasIsSized = false;
+    let posterSettled = false;
+    let hasReportedPosterReady = false;
+
+    const reportPosterReady = () => {
+      if (hasReportedPosterReady) return;
+
+      hasReportedPosterReady = true;
+      setIsPosterReady(true);
+    };
 
     const uploadPoster = (image: HTMLImageElement) => {
-      if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) return;
-
       try {
         gl.bindTexture(gl.TEXTURE_2D, texture);
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
@@ -538,7 +607,7 @@ export function ProjectDemoVideo({
     };
 
     const draw = () => {
-      if (!canvasIsSized) return;
+      if (!canvasIsSized) return false;
 
       const hasVideoFrame =
         video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA &&
@@ -571,6 +640,10 @@ export function ProjectDemoVideo({
       gl.uniform1f(sceneAspectLocation, resolvedSceneAspect);
       gl.uniform1i(hasTextureLocation, hasTexture ? 1 : 0);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+      if (posterSettled) reportPosterReady();
+
+      return true;
     };
 
     const drawNextVideoFrame = () => {
@@ -604,10 +677,21 @@ export function ProjectDemoVideo({
     };
 
     const posterImage = new Image();
-    posterImage.addEventListener("load", () => {
+    const handlePosterLoad = () => {
       uploadPoster(posterImage);
+      posterSettled = true;
       draw();
-    });
+    };
+    const handlePosterError = () => {
+      // The scene photograph and shader's fill colour remain intentional
+      // fallbacks when a poster request fails.
+      posterSettled = true;
+      reportPosterReady();
+      draw();
+    };
+
+    posterImage.addEventListener("load", handlePosterLoad);
+    posterImage.addEventListener("error", handlePosterError);
     posterImage.src = poster;
 
     const handleFrameReady = () => {
@@ -628,7 +712,8 @@ export function ProjectDemoVideo({
 
     return () => {
       if (frameRequest !== null) window.cancelAnimationFrame(frameRequest);
-      posterImage.removeEventListener("load", () => undefined);
+      posterImage.removeEventListener("load", handlePosterLoad);
+      posterImage.removeEventListener("error", handlePosterError);
       resizeObserver.disconnect();
       video.removeEventListener("loadeddata", handleFrameReady);
       video.removeEventListener("canplay", handleFrameReady);
@@ -640,6 +725,24 @@ export function ProjectDemoVideo({
       gl.deleteProgram(program);
     };
   }, [poster, quadKey, resolvedAspect, resolvedFill, resolvedQuad, resolvedSceneAspect]);
+
+  useEffect(() => {
+    const mediaElement = sceneRef.current?.closest<HTMLElement>(
+      ".project-card__media[data-demo-reveal]",
+    );
+
+    if (!mediaElement) return;
+
+    mediaElement.classList.remove("is-demo-ready");
+
+    if (isSceneImageReady && isPosterReady) {
+      mediaElement.classList.add("is-demo-ready");
+    }
+
+    return () => {
+      mediaElement.classList.remove("is-demo-ready");
+    };
+  }, [isPosterReady, isSceneImageReady]);
 
   const toggleAudio = () => {
     const video = videoRef.current;

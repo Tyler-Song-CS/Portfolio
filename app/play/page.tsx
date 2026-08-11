@@ -114,6 +114,8 @@ export default function PlayPage() {
                     {project.id === "one" ? (
                       <div
                         className="project-card__media project-card__media--mini-guitar"
+                        data-demo-reveal
+                        data-media-reveal
                         data-reveal
                         data-visual-reveal
                       >
@@ -132,6 +134,8 @@ export default function PlayPage() {
                     ) : project.id === "two" ? (
                       <div
                         className="project-card__media project-card__media--clayform"
+                        data-demo-reveal
+                        data-media-reveal
                         data-reveal
                         data-visual-reveal
                       >
@@ -178,6 +182,7 @@ export default function PlayPage() {
                 {activities.map((activity) => (
                   <article
                     className={`activity-card activity-card--${activity.id} motion-reveal`}
+                    data-media-reveal
                     data-reveal
                     key={activity.id}
                   >

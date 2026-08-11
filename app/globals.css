@@ -1757,6 +1757,18 @@ h3 {
     transform: translate3d(0, 0, 0);
   }
 
+  /* Activity galleries retain lazy loading, but wait to begin their entrance
+     until every image in the current card can paint. */
+  html.motion-active .motion-reveal[data-media-reveal].is-visible {
+    opacity: 0;
+    transform: translate3d(0, 2rem, 0);
+  }
+
+  html.motion-active .motion-reveal[data-media-reveal].is-visible.is-image-ready {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+
   html.motion-active .work-project__header.motion-reveal {
     transition-delay: 30ms;
   }
@@ -2728,6 +2740,18 @@ h3 {
   }
 
   html.motion-active .project-card__media[data-visual-reveal].is-visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* The projected demo needs both its scene image and WebGL poster before its
+     reveal, otherwise the card can animate in with an empty screen. */
+  html.motion-active .project-card__media[data-demo-reveal].is-visible {
+    opacity: 0;
+    transform: translate3d(0, 1rem, 0) scale(0.985);
+  }
+
+  html.motion-active .project-card__media[data-demo-reveal].is-visible.is-image-ready.is-demo-ready {
     opacity: 1;
     transform: none;
   }
