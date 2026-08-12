@@ -2,14 +2,13 @@
 
 import { useEffect, useState } from "react";
 
-const FIRST_TRANSITION_DELAY = 1650;
-const TRANSITION_INTERVAL = 3200;
+const TRANSITION_INTERVAL = 2500;
 const TRANSITION_DURATION = 640;
 const WORD_COUNT = 5;
 
 /**
- * Cycles the hero verb after its initial static introduction. The duplicated
- * final word lets the track return to the first word without a visible jump.
+ * Cycles the hero verb at a steady interval. The duplicated final word lets
+ * the track return to the first word without a visible jump.
  */
 export function HeroRotator() {
   const [wordIndex, setWordIndex] = useState(0);
@@ -96,7 +95,7 @@ export function HeroRotator() {
 
       if (currentIndex === WORD_COUNT - 1) {
         // Reset as soon as the duplicate final word settles so the next
-        // visible transition still begins on the regular 3.2 second cadence.
+        // visible transition still begins on the regular 2.5 second cadence.
         resetTimer = window.setTimeout(resetToFirstWord, TRANSITION_DURATION);
       }
 
@@ -112,7 +111,7 @@ export function HeroRotator() {
       if (reducedMotionQuery.matches) return;
 
       enableTransitionOnNextPaint();
-      transitionTimer = window.setTimeout(advanceWord, FIRST_TRANSITION_DELAY);
+      transitionTimer = window.setTimeout(advanceWord, TRANSITION_INTERVAL);
     };
 
     const handleMotionPreferenceChange = () => {

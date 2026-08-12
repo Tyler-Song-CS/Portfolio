@@ -326,10 +326,6 @@ h3 {
   padding-bottom: 0.65rem;
 }
 
-.text-link--quiet::after {
-  display: none;
-}
-
 .hero-art {
   position: relative;
   isolation: isolate;
@@ -3564,5 +3560,22 @@ h3 {
 
   .work-project--ucsd .project-proof {
     margin-top: 0;
+  }
+}
+
+/* Keep the phone-sized opening contained in one viewport. The header overlays
+   the hero just as it does on desktop, so its actual height never needs to be
+   hard-coded into the hero calculation. */
+@media (max-width: 720px) {
+  .home-page .site-header,
+  .play-page .site-header {
+    position: absolute;
+    inset: 0 0 auto;
+    width: 100%;
+  }
+
+  .home-page .home-hero--editorial,
+  .play-page .play-hero--editorial {
+    min-height: 100svh;
   }
 }
